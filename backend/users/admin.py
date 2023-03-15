@@ -1,3 +1,23 @@
 from django.contrib import admin
+# from django.contrib.auth.admin import UserAdmin
+from .models import Subscribe, User
 
-# Register your models here.
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = (
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'password',
+    )
+    list_filter = ('username', 'email',)
+
+
+@admin.register(Subscribe)
+class SubscribeAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'author',
+    )

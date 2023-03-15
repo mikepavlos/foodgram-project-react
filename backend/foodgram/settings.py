@@ -112,6 +112,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_LENGTH = 254
+USERNAME_LENGTH = 150
 
-PASSWORD_LENGTH = 150
+AUTH_USER_MODEL = 'users.User'
