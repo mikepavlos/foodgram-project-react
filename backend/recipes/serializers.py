@@ -1,11 +1,9 @@
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 from .models import (
-    Favorite,
     Ingredient,
     IngredientInRecipe,
     Recipe,
-    ShoppingCart,
     Tag
 )
 from users.serializers import UserSerializer
@@ -24,8 +22,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all()
+    id = serializers.ReadOnlyField(
+        source='ingredient.id'
     )
     name = serializers.ReadOnlyField(
         source='ingredient.name'
@@ -44,10 +42,24 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         )
 
 
+class IngredientInRecipeWriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = IngredientInRecipe
+        fields = (
+            'id',
+            'amount',
+        )
+
+
 class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = UserSerializer()
-    ingredients = IngredientInRecipeSerializer(many=True)
+    ingredients = IngredientInRecipeSerializer(
+        many=True,
+        source='ingredientinrecipe'
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
@@ -79,7 +91,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
-    ingredients = IngredientInRecipeSerializer(
+    ingredients = IngredientInRecipeWriteSerializer(
         many=True
     )
     tags = serializers.PrimaryKeyRelatedField(
@@ -101,19 +113,19 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def add_ingredients(recipe, ingredients):
-        IngredientInRecipe.objects.bulk_create([IngredientInRecipe(
-            ingredient=current_ingredient['pk'],
-            recipe=recipe,
-            amount=current_ingredient['amount']
-        ) for current_ingredient in ingredients])
+        ingredients_list = [
+            IngredientInRecipe(
+                ingredient=Ingredient.objects.get(id=current_ingredient['id']),
+                recipe=recipe,
+                amount=current_ingredient['amount']
+            ) for current_ingredient in ingredients
+        ]
+        IngredientInRecipe.objects.bulk_create(ingredients_list)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(
-            author=self.context.get('request'),
-            **validated_data
-        )
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.add_ingredients(recipe, ingredients)
         return recipe
@@ -121,7 +133,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        instance.tag.clear()
+        instance.tags.clear()
         instance.ingredients.clear()
         instance.tags.set(tags)
         self.add_ingredients(instance, ingredients)
@@ -132,3 +144,17 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             instance,
             context={'request': self.context.get('request')}
         ).data
+
+
+class RecipeListSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
+        read_only_fields = fields
