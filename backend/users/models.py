@@ -2,30 +2,34 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from .validators import username_validator
-
 
 class User(AbstractUser):
-    username = models.CharField(
-        'Пользователь',
-        max_length=settings.USERNAME_LENGTH,
+    email = models.EmailField(
+        'Эл. почта',
+        max_length=254,
         unique=True,
-        validators=[username_validator]
     )
     first_name = models.CharField(
-        'имя',
+        'Имя',
         max_length=settings.USERNAME_LENGTH,
         blank=False,
     )
     last_name = models.CharField(
-        'фамилия',
+        'Фамилия',
         max_length=settings.USERNAME_LENGTH,
         blank=False,
     )
     password = models.CharField(
-        'пароль',
+        'Пароль',
         max_length=settings.USERNAME_LENGTH,
     )
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+    ]
 
     class Meta:
         verbose_name = 'Пользователь'

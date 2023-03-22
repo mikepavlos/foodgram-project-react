@@ -3,31 +3,6 @@ from django.core.validators import MinValueValidator, RegexValidator
 from users.models import User
 
 
-class Ingredient(models.Model):
-    name = models.CharField(
-        'Название',
-        max_length=200,
-    )
-    measurement_unit = models.CharField(
-        'Единица измерения',
-        max_length=200,
-    )
-
-    class Meta:
-        ordering = ['name']
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name', 'measurement_unit'],
-                name='unique_ingredient_unit'
-            )
-        ]
-
-    def __str__(self):
-        return self.name
-
-
 class Tag(models.Model):
     name = models.CharField(max_length=200)
     color = models.CharField(
@@ -50,6 +25,31 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    name = models.CharField(
+        'Название',
+        max_length=200,
+    )
+    measurement_unit = models.CharField(
+        'Единица измерения',
+        max_length=200,
+    )
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient_unit'
+            )
+        ]
 
     def __str__(self):
         return self.name

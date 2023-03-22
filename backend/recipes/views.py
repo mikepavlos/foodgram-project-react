@@ -1,17 +1,26 @@
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from .models import (
+    Favorite,
+    Ingredient,
+    IngredientInRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag
+)
 from .serializers import (
     IngredientSerializer,
-    RecipeListSerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
     TagSerializer
 )
+from users.serializers import RecipeMiniFieldSerializer
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -29,7 +38,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
-        if self.request.method == 'get':
+        if self.request.method == 'GET':
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
@@ -48,7 +57,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 {'errors': 'Дублирование добавления.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        serializer = RecipeListSerializer(recipe)
+        serializer = RecipeMiniFieldSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @staticmethod
@@ -81,3 +90,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'POST':
             return self.add_to_list(ShoppingCart, request.user, pk)
         return self.delete_from_list(ShoppingCart, request.user, pk)
+
+    @action(
+        detail=False,
+        permission_classes=[IsAuthenticated]
+    )
+    def download_shopping_cart(self, request):
+        ingredients = (
+            IngredientInRecipe.objects
+            .filter(recipe__shopping__user=request.user)
+            .values('ingredient__name', 'ingredient__measurement_unit')
+            .annotate(amount=Sum('amount'))
+        )
+        shopping_cart = [f'Список покупок {request.user}.\n']
+        for ingredient in ingredients:
+            shopping_cart.append(
+                f'{ingredient["ingredient__name"]} - '
+                f'{ingredient["amount"]} '
+                f'{ingredient["ingredient__measurement_unit"]}\n'
+            )
+        file = f'{request.user}_shopping_cart.txt'
+        response = HttpResponse(shopping_cart, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={file}'
+        return response
