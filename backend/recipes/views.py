@@ -3,9 +3,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from foodgram.pagination import Paginator
 from .models import (
     Favorite,
     Ingredient,
@@ -14,13 +15,14 @@ from .models import (
     ShoppingCart,
     Tag
 )
+from .permissions import IsAuthorOrAdminOrReadOnly
 from .serializers import (
     IngredientSerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
     TagSerializer
 )
-from users.serializers import RecipeMiniFieldSerializer
+from users.serializers import RecipeMinifiedSerializer
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -35,6 +37,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
+    pagination_class = Paginator
+    permission_classes = [IsAuthorOrAdminOrReadOnly]
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
@@ -57,7 +61,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 {'errors': 'Дублирование добавления.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        serializer = RecipeMiniFieldSerializer(recipe)
+        serializer = RecipeMinifiedSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @staticmethod

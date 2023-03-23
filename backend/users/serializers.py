@@ -1,6 +1,6 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from .models import Subscribe, User
+from .models import User
 from recipes.models import Recipe
 
 FIELDS = ('email', 'id', 'username', 'first_name', 'last_name',)
@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         return obj.subscribing.filter(
-            user=self.context.get('request').user
+            user=self.context.get('request').user.id
         ).exists()
 
 
@@ -29,7 +29,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class RecipeMiniFieldSerializer(serializers.ModelSerializer):
+class RecipeMinifiedSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
 
     class Meta:
@@ -44,7 +44,7 @@ class RecipeMiniFieldSerializer(serializers.ModelSerializer):
 
 
 class UserWithRecipesSerializer(UserSerializer):
-    recipes = RecipeMiniFieldSerializer(many=True)
+    recipes = RecipeMinifiedSerializer(many=True)
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):

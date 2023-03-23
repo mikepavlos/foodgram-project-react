@@ -81,7 +81,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def status(self, objects):
-        return objects.filter(user=self.context.get('request').user).exists()
+        user = self.context.get('request').user.id
+        return objects.filter(user=user).exists()
 
     def get_is_favorited(self, obj):
         return self.status(obj.favorite)

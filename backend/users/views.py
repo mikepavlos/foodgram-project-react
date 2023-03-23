@@ -5,11 +5,15 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from djoser import permissions
+
+from foodgram.pagination import Paginator
 from .models import Subscribe, User
 from .serializers import UserWithRecipesSerializer
 
 
 class UserViewSet(DjoserUserViewSet):
+    pagination_class = Paginator
     http_method_names = ('get', 'post')
 
     @action(
