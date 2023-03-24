@@ -6,22 +6,22 @@ from django.db import models
 class User(AbstractUser):
     email = models.EmailField(
         'Эл. почта',
-        max_length=254,
+        max_length=settings.EMAIL_LENGTH,
         unique=True,
     )
     first_name = models.CharField(
         'Имя',
-        max_length=settings.USERNAME_LENGTH,
+        max_length=settings.USER_FIELD_LENGTH,
         blank=False,
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=settings.USERNAME_LENGTH,
+        max_length=settings.USER_FIELD_LENGTH,
         blank=False,
     )
     password = models.CharField(
         'Пароль',
-        max_length=settings.USERNAME_LENGTH,
+        max_length=settings.USER_FIELD_LENGTH,
     )
 
     USERNAME_FIELD = 'email'

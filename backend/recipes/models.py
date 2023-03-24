@@ -1,13 +1,14 @@
+from django.conf import settings
 from django.db import models
 from django.core.validators import MinValueValidator, RegexValidator
 from users.models import User
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=settings.DEFAULT_FIELD_LENGTH)
     color = models.CharField(
         'Цвет в формате HEX',
-        max_length=7,
+        max_length=settings.HEX_LENGTH,
         null=True,
         validators=[
             RegexValidator(
@@ -17,7 +18,7 @@ class Tag(models.Model):
         ],
     )
     slug = models.SlugField(
-        max_length=200,
+        max_length=settings.DEFAULT_FIELD_LENGTH,
         null=True,
         unique=True
     )
@@ -33,11 +34,11 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         'Название',
-        max_length=200,
+        max_length=settings.DEFAULT_FIELD_LENGTH,
     )
     measurement_unit = models.CharField(
         'Единица измерения',
-        max_length=200,
+        max_length=settings.DEFAULT_FIELD_LENGTH,
     )
 
     class Meta:
@@ -58,7 +59,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     name = models.CharField(
         'Название',
-        max_length=200
+        max_length=settings.DEFAULT_FIELD_LENGTH
     )
     text = models.TextField(
         'Описание'
@@ -86,8 +87,11 @@ class Recipe(models.Model):
         'Время приготовления в мин.',
         validators=[
             MinValueValidator(
-                1,
-                message=f'Минимальное время приготовления в минутах: {1}'
+                settings.MIN_VALUE,
+                message=(
+                    f'Минимальное время приготовления в минутах: '
+                    f'{settings.MIN_VALUE}'
+                )
             )
         ]
     )
@@ -127,8 +131,11 @@ class IngredientInRecipe(models.Model):
         'Количество ингредиента',
         validators=[
             MinValueValidator(
-                1,
-                message=f'Минимальное количество ингредиента: {1} ед.'
+                settings.MIN_VALUE,
+                message=(
+                    f'Минимальное количество ингредиента:'
+                    f'{settings.MIN_VALUE} ед.'
+                )
             )
         ]
     )
