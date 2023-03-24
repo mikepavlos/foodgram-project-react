@@ -44,7 +44,7 @@ class RecipeMinifiedSerializer(serializers.ModelSerializer):
 
 
 class UserWithRecipesSerializer(UserSerializer):
-    recipes = RecipeMinifiedSerializer(many=True)
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
@@ -54,6 +54,17 @@ class UserWithRecipesSerializer(UserSerializer):
             'recipes_count',
         )
 
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        queryset = obj.recipes.all()
+        recipes_limit = request.GET.get('recipes_limit')
+        if recipes_limit:
+            queryset = queryset[:int(recipes_limit)]
+        serializer = RecipeMinifiedSerializer(
+            queryset,
+            many=True
+        )
+        return serializer.data
+
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-
