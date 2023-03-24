@@ -57,7 +57,7 @@ class UserWithRecipesSerializer(UserSerializer):
     def get_recipes(self, obj):
         request = self.context.get('request')
         queryset = obj.recipes.all()
-        recipes_limit = request.GET.get('recipes_limit')
+        recipes_limit = request.query_params.get('recipes_limit')
         if recipes_limit:
             queryset = queryset[:int(recipes_limit)]
         serializer = RecipeMinifiedSerializer(

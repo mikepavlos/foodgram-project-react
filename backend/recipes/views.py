@@ -1,12 +1,14 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from foodgram.pagination import Paginator
+from .filters import RecipeFilter
 from .models import (
     Favorite,
     Ingredient,
@@ -33,13 +35,17 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = Paginator
-    permission_classes = [IsAuthorOrAdminOrReadOnly]
-    http_method_names = ('get', 'post', 'patch', 'delete')
+    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
+    http_method_names = ('get', 'post', 'patch', 'delete',)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -78,7 +84,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         methods=['POST', 'DELETE'],
         detail=True,
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk):
         if request.method == 'POST':
@@ -88,7 +94,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         methods=['POST', 'DELETE'],
         detail=True,
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk):
         if request.method == 'POST':
@@ -97,7 +103,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
         ingredients = (
