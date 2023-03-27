@@ -24,24 +24,13 @@ class UserViewSet(DjoserUserViewSet):
         user = request.user
         if request.method == 'POST':
             author = get_object_or_404(User, id=id)
-            if author == user:
-                return Response(
-                    {'errors': 'Нельзя подписываться на самого себя.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            _, create = Subscribe.objects.get_or_create(
-                user=user,
-                author=author
-            )
-            if not create:
-                return Response(
-                    {'errors': 'Вы уже подписаны на автора.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             serializer = UserWithRecipesSerializer(
                 author,
+                data=request.data,
                 context={'request': request}
             )
+            serializer.is_valid(raise_exception=True)
+            Subscribe.objects.create(user=user, author=author)
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED

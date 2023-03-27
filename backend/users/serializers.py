@@ -1,6 +1,7 @@
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
-from .models import User
+from rest_framework import serializers, status, exceptions
+
+from .models import User, Subscribe
 from recipes.models import Recipe
 
 FIELDS = ('email', 'id', 'username', 'first_name', 'last_name',)
@@ -53,6 +54,20 @@ class UserWithRecipesSerializer(UserSerializer):
             'recipes',
             'recipes_count',
         )
+        read_only_fields = FIELDS
+
+    def validate(self, attrs):
+        user = self.context.get('request').user
+        author = self.instance
+        if author == user:
+            raise exceptions.ValidationError(
+                {'errors': 'Нельзя подписываться на самого себя.'}
+            )
+        if Subscribe.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError(
+                {'errors': 'Вы уже подписаны на автора.'}
+            )
+        return attrs
 
     def get_recipes(self, obj):
         request = self.context.get('request')
