@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -50,7 +51,13 @@ class UserViewSet(DjoserUserViewSet):
                 context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            Subscribe.objects.create(user=user, author=author)
+            try:
+                Subscribe.objects.create(user=user, author=author)
+            except IntegrityError:
+                return Response(
+                    {'errors': 'Вы уже подписаны на автора.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
@@ -111,11 +118,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @staticmethod
     def add_to_list(model, user, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
-        _, create = model.objects.get_or_create(
-            user=user,
-            recipe=recipe
-        )
-        if not create:
+        # _, create = model.objects.get_or_create(
+        #     user=user,
+        #     recipe=recipe
+        # )
+        # if not create:
+        try:
+            model.objects.create(user=user, recipe=recipe)
+        except IntegrityError:
             return Response(
                 {'errors': 'Дублирование добавления.'},
                 status=status.HTTP_400_BAD_REQUEST

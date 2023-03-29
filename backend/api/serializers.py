@@ -38,6 +38,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserWithRecipesSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
+    id = serializers.IntegerField(default=serializers.CurrentUserDefault())
 
     class Meta(UserSerializer.Meta):
         fields = FIELDS + (
@@ -47,18 +48,12 @@ class UserWithRecipesSerializer(UserSerializer):
         )
         read_only_fields = FIELDS
 
-    def validate(self, attrs):
-        user = self.context.get('request').user
-        author = self.instance
-        if author == user:
+    def validate_id(self, value):
+        if self.instance.id == value.id:
             raise serializers.ValidationError(
-                {'errors': 'Нельзя подписываться на самого себя.'}
+                'Нельзя подписываться на самого себя.'
             )
-        if Subscribe.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError(
-                {'errors': 'Вы уже подписаны на автора.'}
-            )
-        return attrs
+        return value
 
     def get_recipes(self, obj):
         request = self.context.get('request')
