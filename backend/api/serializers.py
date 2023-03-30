@@ -1,4 +1,5 @@
 from drf_extra_fields.fields import Base64ImageField
+from djoser.serializers import UserSerializer as DjoserUserSerializer, UserCreateSerializer as DjoserUserCreateSerializer
 from rest_framework import serializers
 
 from recipes.models import (
@@ -12,7 +13,7 @@ from users.models import Subscribe, User
 FIELDS = ('email', 'id', 'username', 'first_name', 'last_name',)
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(DjoserUserSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -26,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
         ).exists()
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(DjoserUserCreateSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -188,7 +189,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(
+            author=self.context.get('request').user,
+            **validated_data
+        )
         recipe.tags.set(tags)
         self.add_ingredients(recipe, ingredients)
         return recipe

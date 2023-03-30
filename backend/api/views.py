@@ -118,11 +118,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @staticmethod
     def add_to_list(model, user, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
-        # _, create = model.objects.get_or_create(
-        #     user=user,
-        #     recipe=recipe
-        # )
-        # if not create:
         try:
             model.objects.create(user=user, recipe=recipe)
         except IntegrityError:

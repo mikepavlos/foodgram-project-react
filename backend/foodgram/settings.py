@@ -7,7 +7,9 @@ SECRET_KEY = 'django-insecure-g1#78gjy@!onrrb(cuv%iqmr@@gu8(g487^+#nr)e8zvt=t9sr
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://*', 'https://*']
+
+ALLOWED_HOSTS = ['*', '127.0.0.1', 'localhost', '[::1]']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -63,8 +65,6 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT')
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
