@@ -71,8 +71,8 @@ jobs:
           script: |
             sudo docker-compose stop backend
             sudo docker-compose rm -f backend
+            sudo docker image prune -a
             sudo docker-compose pull backend
-            sudo docker image prune
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
