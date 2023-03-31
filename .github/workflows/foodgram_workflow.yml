@@ -70,7 +70,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker-compose stop backend
-            sudo docker-compose rm backend
+            sudo docker-compose rm -f backend
             sudo docker image prune -a
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} > .env

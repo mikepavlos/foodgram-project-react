@@ -166,7 +166,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         many=True
     )
     image = Base64ImageField()
-    author = UserSerializer(required=True)
+    author = UserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
