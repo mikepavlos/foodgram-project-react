@@ -1,5 +1,8 @@
 from drf_extra_fields.fields import Base64ImageField
-from djoser.serializers import UserSerializer as DjoserUserSerializer, UserCreateSerializer as DjoserUserCreateSerializer
+from djoser.serializers import (
+    UserSerializer as DjoserUserSerializer,
+    UserCreateSerializer as DjoserUserCreateSerializer
+)
 from rest_framework import serializers
 
 from recipes.models import (
@@ -8,7 +11,7 @@ from recipes.models import (
     Recipe,
     Tag
 )
-from users.models import Subscribe, User
+from users.models import User
 
 FIELDS = ('email', 'id', 'username', 'first_name', 'last_name',)
 
