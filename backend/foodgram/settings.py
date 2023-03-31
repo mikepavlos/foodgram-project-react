@@ -7,7 +7,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+CSRF_TRUSTED_ORIGINS = ['http://158.160.59.172', 'http://*', 'https://*']
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS')]
 
