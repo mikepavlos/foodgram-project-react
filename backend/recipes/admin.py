@@ -49,7 +49,7 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = (
         'name',
         'author',
-        'tags',
+        'tags__name',
     )
 
     @display(description='Общее число в избранном')
