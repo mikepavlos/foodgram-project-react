@@ -1,6 +1,10 @@
 from django.conf import settings
 from django.db import models
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+    RegexValidator
+)
 
 from users.models import User
 
@@ -86,13 +90,20 @@ class Recipe(models.Model):
         verbose_name='Ингредиенты',
     )
     cooking_time = models.IntegerField(
-        'Время приготовления в мин.',
+        'Время в мин.',
         validators=[
             MinValueValidator(
                 settings.MIN_VALUE,
                 message=(
                     f'Минимальное время приготовления в минутах: '
                     f'{settings.MIN_VALUE}'
+                )
+            ),
+            MaxValueValidator(
+                settings.MAX_COOKING_TIME,
+                message=(
+                    f'Максимальное время приготовления в минутах: '
+                    f'{settings.MAX_COOKING_TIME}'
                 )
             )
         ]
@@ -135,8 +146,15 @@ class IngredientInRecipe(models.Model):
             MinValueValidator(
                 settings.MIN_VALUE,
                 message=(
-                    f'Минимальное количество ингредиента:'
+                    f'Минимальное количество ингредиента: '
                     f'{settings.MIN_VALUE} ед.'
+                )
+            ),
+            MaxValueValidator(
+                settings.MAX_AMOUNT,
+                message=(
+                    f'Максимальное количество ингредиента: '
+                    f'{settings.MAX_AMOUNT} ед.'
                 )
             )
         ]
