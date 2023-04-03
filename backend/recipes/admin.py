@@ -40,6 +40,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'image',
         'cooking_time',
         'added_to_favorite',
+        'ingredients'
     )
     list_filter = (
         'name',
