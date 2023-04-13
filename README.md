@@ -75,7 +75,7 @@ docker-compose up -d
 ```
 SECRET_KEY             # "секретный ключ джанго-проекта" в кавычках
 ALLOWED_HOSTS          # *, хост сервера
-CSRF_TRUSTED_ORIGINS   # доверенные хосты для проверки CSRF
+CSRF_TRUSTED_ORIGINS   # доверенные хосты для проверки CSRF (http://... https://...)
 
 DOCKER_USERNAME        # имя пользователя в DockerHub
 DOCKER_PASSWORD        # пароль доступа в DockerHub
