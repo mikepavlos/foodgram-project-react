@@ -11,6 +11,10 @@ from .models import (
 )
 
 
+class IngredientInRecipeInline(admin.TabularInline):
+    model = IngredientInRecipe
+
+
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
@@ -41,6 +45,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'cooking_time',
         'added_to_favorite',
     )
+    inlines = (IngredientInRecipeInline,)
     list_filter = (
         'name',
         'author',

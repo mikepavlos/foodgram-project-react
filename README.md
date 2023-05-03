@@ -9,15 +9,23 @@ Foodgram, «Продуктовый помощник».
 а перед походом в магазин скачивать сводный список продуктов, 
 необходимых для приготовления одного или нескольких выбранных блюд.
 
-Сервис развернут на сервере, доступен по адресу: http://158.160.59.172/  
+![foodgram-image.jpeg](foodgram-image.jpeg)
 
 ---
 
-Проект разворачивается в контейнерах Docker из образов приложений 'frontend', 'backend', официальных 'db' (postgres) и 'nginx', с использованием технологий CI/CD 
+Разработка велась в рамках создания серверной части сервиса и логики его работы, 
+организации взаимодействия с базой данных, соединения backend с готовым 
+frontend приложением (React), а также создания API проекта на базе 
+Django REST framework.  
+Проект разворачивается в контейнерах Docker из образов сервисов 'frontend', 
+'backend', 'db' (postgres) и 'nginx', с использованием технологий CI/CD 
 (continuous integration и continuous deployment) GitHub Actions.  
-Сервис frontend подготовит файлы, необходимые для работы фронтенд-приложения, а затем прекратит свою работу.  
-При внесении изменений в код проекта и отправке в репозиторий GitHub, производится автоматическая проверка на соответствие стандарту PEP8. 
-После успешного прохождения тестов обновленные Docker-образы 'frontend' и 'backend' сохраняются на DockerHub и разворачиваются в Docker-контейнерах на сервере.
+Сервис frontend подготовит файлы, необходимые для работы фронтенд-приложения, 
+а затем прекратит свою работу.  
+При внесении изменений в код проекта и отправке в репозиторий GitHub, 
+производится автоматическая проверка на соответствие стандарту PEP8. 
+После успешного прохождения тестов обновленные Docker-образы 'frontend' и 'backend' 
+сохраняются на DockerHub и разворачиваются в Docker-контейнерах на сервере.
 
 ### Стек технологий:
 
@@ -35,11 +43,12 @@ Foodgram, «Продуктовый помощник».
 
 ### Получение проекта:
 
-Клонировать репозиторий:
+Форк репозитория с GitHab:
 
 ```commandline
 https://github.com/mikepavlos/foodgram-project-react.git
 ```
+
 ---
 
 ### Запуск проекта локально в Docker-контейнерах:
@@ -53,10 +62,24 @@ POSTGRES_USER=postgres                  # логин для подключени
 POSTGRES_PASSWORD=postgres              # пароль для подключения к БД (установите свой)
 DB_HOST=db                              # название сервиса (контейнера)
 DB_PORT=5432                            # порт для подключения к БД
-SECRET_KEY=                             # секретный ключ джанго-проекта
-ALLOWED_HOSTS=localhost                 # локальный хост, 127.0.0.1, [::1] и т.п.
-CSRF_TRUSTED_ORIGINS=http://localhost   # localhost, http://127.0.0.1, http://*  т.п.
+SECRET_KEY=top_secret                   # секретный ключ джанго-проекта
+ALLOWED_HOSTS=localhost                 # локальный хост, 127.0.0.1, [::1] или *
+CSRF_TRUSTED_ORIGINS=http://localhost   # доверенный хост (соответственно, локальный)
 ```
+
+В файле `docker-compose.yml` в настройках сервиса `backend` либо оставить 
+скачивание образа приложения с DockerHub, либо вместо команды `image` 
+прописать `build` для сборки образа из проекта.
+
+```yaml
+  backend:
+    image: miha1is/foodgram-backend:latest
+    # build: ../backend
+    restart: always
+...
+```
+
+То же самое предложение для сервиса `frontend`.  
 
 Выполнить команду развертывания контейнеров проекта:
 
@@ -70,32 +93,30 @@ docker-compose up -d
 
 #### Подготовка GitHub Actions:
 
-Во вкладке настроек репозитория проекта, в меню выбрать `Secrets and variables` выбрать `Actions`, нажав кнопку `New repository secret`, создать переменные окружения:
+После создания репозитория в своем аккаунте GitHub во вкладке настроек 
+репозитория проекта, в меню выбрать `Secrets and variables` выбрать `Actions`, 
+нажать кнопку `New repository secret`, создать переменные окружения:
 
-```
-SECRET_KEY             # "секретный ключ джанго-проекта" в кавычках
-ALLOWED_HOSTS          # *, хост сервера
-CSRF_TRUSTED_ORIGINS   # доверенные хосты для проверки CSRF (http://... https://...)
+| Секрет               | Значение                                                                               |
+|----------------------|----------------------------------------------------------------------------------------|
+| SECRET_KEY           | "секретный ключ джанго-проекта" в кавычках                                             |
+| ALLOWED_HOSTS        | *, хост сервера                                                                        |
+| CSRF_TRUSTED_ORIGINS | доверенные хосты для проверки CSRF (http://... https://...)                            |
+| DOCKER_USERNAME      | имя пользователя в DockerHub                                                           |
+| DOCKER_PASSWORD      | пароль доступа в DockerHub                                                             |
+| DB_ENGINE            | django.db.backends.postgresql                                                          |
+| DB_NAME              | имя базы данных                                                                        |
+| POSTGRES_USER        | логин для подключения к базе данных                                                    |
+| POSTGRES_PASSWORD    | пароль для подключения к БД                                                            |
+| DB_HOST              | db                                                                                     |
+| DB_PORT              | 5432                                                                                   |
+| USER                 | логин сервера                                                                          |
+| HOST                 | ip сервера                                                                             |
+| SSH_KEY              | приватный ключ локальной машины, по которому происходит вход на сервер (~/.ssh/id_rsa) |
+| PASSPHRASE           | фраза-пароль ключа ssh (если установлена)                                              |
+| TELEGRAM_TO          | id телеграм-чата (@userinfobot)                                                        |
+| TELEGRAM_TOKEN       | токен телеграм-бота (@BotFather - /mybots - Choose a bot - API Token)                  |
 
-DOCKER_USERNAME        # имя пользователя в DockerHub
-DOCKER_PASSWORD        # пароль доступа в DockerHub
-
-DB_ENGINE              # django.db.backends.postgresql
-DB_NAME                # имя базы данных
-POSTGRES_USER          # логин для подключения к базе данных
-POSTGRES_PASSWORD      # пароль для подключения к БД
-DB_HOST                # db
-DB_PORT                # порт для подключения к БД 5432
-
-USER                   # логин сервера
-HOST                   # ip сервера
-SSH_KEY                # приватный ключ локальной машины, 
-                       # по которому происходит вход на сервер (~/.ssh/id_rsa)
-PASSPHRASE             # фраза-пароль ключа ssh (если установлена)
-
-TELEGRAM_TO            # id телеграм-чата (@userinfobot)
-TELEGRAM_TOKEN         # токен телеграм-бота (@BotFather - /mybots - Choose a bot - API Token)
-```
 
 #### Подготовка сервера:
 
@@ -114,7 +135,8 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-Из паки `infra` локального проекта cкопировать на сервер в домашнюю дирректорию файлы настроек nginx и docker-compose
+Из паки `infra` локального проекта cкопировать на сервер в домашнюю дирректорию 
+файлы настроек nginx и docker-compose
 
 ```commandline
 scp docker-compose.yaml <USER>@<HOST>:/home/<USER>
@@ -124,19 +146,26 @@ scp docker-compose.yaml <USER>@<HOST>:/home/<USER>
 scp nginx.conf <USER>@<HOST>:/home/<USER>
 ```
 
-На сервере в домашней директории создать файл `.env` с настройками по образцу выше.
+Запуск при любом `push` на GitHub проект:
+- тестируется на соответствие PEP8, 
+- обновляются и сохраняются на DockerHub образы `backend` и `frontend`, 
+- в домашней директории сервера автоматически создается файл `.env`
+- проект автоматически разворачивается на сервере, 
+- о чем приходит сообщение на telegram.
+
+Для запуска сервиса на сервере вручную:  
+- на сервере в домашней директории создать файл `.env` с настройками 
+по образцу выше с учетом данных хоста.
 
 ```commandline
 nano .env
 ```
 
-Запуск проекта на сервере командой
+- запуск
 
 ```commandline
 sudo docker-compose up -d
 ```
-
-Либо при `push` на GitHub проект тестируется, обновляется его образ и автоматически разворачивается на сервере, о чем приходит сообщение на telegram.
 
 --- 
 После успешного развертывания проекта на сервере или локально:  
@@ -159,6 +188,8 @@ sudo docker-compose exec backend python manage.py collectstatic --no-input
 ```commandline
 sudo docker-compose exec backend python manage.py loaddata dump/ingredients.json
 ```
+
+В админ-зоне проекта создать необходимые теги (без тегов рецепт создать не удастся)
 
 ---
 
