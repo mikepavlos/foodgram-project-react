@@ -210,4 +210,6 @@ sudo docker-compose exec backend python manage.py loaddata dump/ingredients.json
 ### Разработка проекта:
 
 Бэкенд, логика сервиса, соединение с подготовленным фронтендом, CI/CD проекта:  
-Михаил Павлов https://github.com/mikepavlos
+Михаил Павлов https://github.com/mikepavlos  
+email mike_pavlovsky@hotmail.com  
+telegram @miha1is
